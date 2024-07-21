@@ -43,21 +43,54 @@ def country_year_list(df):
     return years, country
 
 
+# def data_over_time(df, col):
+#     nations_over_time = df.drop_duplicates(['Year', col])['Year'].value_counts().reset_index().sort_values('index')
+#     nations_over_time.rename(columns={'index': 'Edition', 'Year': col}, inplace=True)
+#     return nations_over_time
+
 def data_over_time(df, col):
-    nations_over_time = df.drop_duplicates(['Year', col])['Year'].value_counts().reset_index().sort_values('index')
-    nations_over_time.rename(columns={'index': 'Edition', 'Year': col}, inplace=True)
+    # Remove duplicates based on Year and the specified column
+    nations_over_time = df.drop_duplicates(['Year', col])['Year'].value_counts().reset_index()
+    
+    # Rename columns to standard names
+    nations_over_time.columns = ['Edition', col]
+    
+    # Sort values by 'Edition' (which is the year)
+    nations_over_time = nations_over_time.sort_values('Edition')
+    
     return nations_over_time
 
 
+# def most_successful(df, sport):
+#     tmp_df = df.dropna(subset=['Medal'])
+
+#     if sport != 'Overall':
+#         tmp_df = tmp_df[tmp_df['Sport'] == sport]
+
+#     x = tmp_df['Name'].value_counts().reset_index().head(15).merge(df, left_on='index', right_on='Name', how='left')[
+#         ['index', 'Name_x', 'Sport', 'region']].drop_duplicates('index')
+#     x.rename(columns={'index': 'Name', 'Name_x': 'Medals'}, inplace=True)
+#     return x
+
 def most_successful(df, sport):
     tmp_df = df.dropna(subset=['Medal'])
-
+    
     if sport != 'Overall':
         tmp_df = tmp_df[tmp_df['Sport'] == sport]
-
-    x = tmp_df['Name'].value_counts().reset_index().head(15).merge(df, left_on='index', right_on='Name', how='left')[
-        ['index', 'Name_x', 'Sport', 'region']].drop_duplicates('index')
-    x.rename(columns={'index': 'Name', 'Name_x': 'Medals'}, inplace=True)
+    
+    # Count medals for each athlete
+    medal_counts = tmp_df['Name'].value_counts().reset_index()
+    medal_counts.columns = ['Name', 'Medals']  # Rename columns
+    
+    # Select top 15 athletes
+    top_athletes = medal_counts.head(15)
+    
+    # Merge with original DataFrame to get additional details
+    x = top_athletes.merge(df[['Name', 'Sport', 'region']].drop_duplicates(), on='Name', how='left')
+    
+    # Ensure no duplicates and rename columns for clarity
+    x = x[['Name', 'Medals', 'Sport', 'region']].drop_duplicates()
+    
     return x
 
 
@@ -81,14 +114,27 @@ def country_event_heatmap(df, country):
         'int')
     return pt
 
+# def most_successful_countrywise(df, country):
+#     temp_df = df.dropna(subset=['Medal'])
+
+#     temp_df = temp_df[temp_df['region'] == country]
+
+#     x = temp_df['Name'].value_counts().reset_index().head(10).merge(df, left_on='index', right_on='Name', how='left')[
+#         ['index', 'Name_x', 'Sport']].drop_duplicates('index')
+#     x.rename(columns={'index': 'Name', 'Name_x': 'Medals'}, inplace=True)
+#     return x
+
 def most_successful_countrywise(df, country):
     temp_df = df.dropna(subset=['Medal'])
-
     temp_df = temp_df[temp_df['region'] == country]
 
-    x = temp_df['Name'].value_counts().reset_index().head(10).merge(df, left_on='index', right_on='Name', how='left')[
-        ['index', 'Name_x', 'Sport']].drop_duplicates('index')
-    x.rename(columns={'index': 'Name', 'Name_x': 'Medals'}, inplace=True)
+    # Calculate top 10 successful athletes
+    x = temp_df['Name'].value_counts().reset_index()
+    x.columns = ['Name', 'Medals']  # Rename columns for clarity
+
+    # Merge to get additional details
+    x = x.head(10).merge(df, left_on='Name', right_on='Name', how='left')[['Name', 'Medals', 'Sport']].drop_duplicates('Name')
+    
     return x
 
 

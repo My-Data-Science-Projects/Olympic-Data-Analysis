@@ -11,7 +11,7 @@ region_df = pd.read_csv('noc_regions.csv')
 
 df = preprocessor.preprocess(df, region_df)
 
-st.sidebar.title("Olympic Data Analysis")
+st.sidebar.title("Olympic Data Analysis till 2016")
 st.sidebar.image('https://d3n8a8pro7vhmx.cloudfront.net/walthamforestlibdems/pages/460/attachments/original/1613439243/'
                  'key_olympic_rings_PNG13.png?1613439243')
 user_menu = st.sidebar.radio(
@@ -98,8 +98,9 @@ if user_menu == 'Overall Analysis':
     sport_list.insert(0, 'Overall')
     selected_sport = st.selectbox("Select a Sport", sport_list)
     x = helper.most_successful(df, selected_sport)
-    x.style.hide_index()
-    st.table(x)
+    # x.style.hide_index()
+    st.table(x.reset_index(drop=True))
+    # st.table(x)
 
 if user_menu == 'Country-wise Analysis':
     st.sidebar.title('Country-wise Analysis')
@@ -122,8 +123,9 @@ if user_menu == 'Country-wise Analysis':
 
     st.title("Top 10 Athletes in " + selected_country)
     top10_df = helper.most_successful_countrywise(df, selected_country)
-    top10_df.style.hide_index()
-    st.table(top10_df)
+    # top10_df.style.hide_index()
+    st.table(top10_df.reset_index(drop=True))
+    # st.table(top10_df)
 
 if user_menu == 'Athlete-wise Analysis':
     athlete_df = df.drop_duplicates(subset=['Name', 'region'])
@@ -168,7 +170,25 @@ if user_menu == 'Athlete-wise Analysis':
     selected_sport = st.selectbox('Select a Sport', sport_list)
     temp_df = helper.weight_v_height(df, selected_sport)
     fig, ax = plt.subplots()
-    ax = sns.scatterplot(temp_df['Weight'], temp_df['Height'], hue=temp_df['Medal'], style=temp_df['Sex'], s=50)
+    # ax = sns.scatterplot(temp_df['Weight'], temp_df['Height'], hue=temp_df['Medal'], style=temp_df['Sex'], s=50)
+    # st.pyplot(fig)
+    # Plot scatterplot with correct keyword arguments
+    sns.scatterplot(
+        x='Weight',           # x-axis values
+        y='Height',           # y-axis values
+        hue='Medal',          # Hue (color) for different categories
+        style='Sex',          # Style for different categories
+        data=temp_df,         # DataFrame containing the data
+        s=50,                 # Size of the markers
+        ax=ax                 # Pass the axes to the plot
+    )
+
+    # Add labels and title if needed
+    ax.set_xlabel('Weight')
+    ax.set_ylabel('Height')
+    ax.set_title('Height vs Weight')
+
+    # Display the plot
     st.pyplot(fig)
 
     st.title("Men Vs Women Participation Over the Years")
